@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Maps</title>
+</head>
+<style type="text/css">
+	body{
+		margin:0;
+	}
+	#map{
+		width:100vw;
+		height: 100vh;
+	}
+</style>
+<body>
+<div id="map" style="height: 500px;"></div>
+</body>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script>
+ 	navigator.geolocation.getCurrentPosition(function(location) {
+    var latlng0 = new L.LatLng(location.coords.latitude, location.coords.longitude);
+    //map view
+    console.log("Lokasi Saat Ini :" + location.coords.latitude, location.coords.longitude);
+    // var L = window.L;
+	var map = L.map('map').setView([-6.849548,107.9228298], 12);
+	let latLng1 = L.latLng(location.coords.latitude, location.coords.longitude);
+	let latLng2 = L.latLng(-6.83544120741361, 107.92392395767143);
+	let wp1 = new L.Routing.Waypoint(latLng1);
+	let wp2 = new L.Routing.Waypoint(latLng2);
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	L.Routing.control({
+	  waypoints: [latLng1,latLng2]
+	}).addTo(map)
+
+	let routeUs = L.Routing.osrmv1();
+	routeUs.route([wp1,wp2],(err,routes)=>
+	{
+		if(!err)
+		{
+			let best = 10000000000000;
+			let bestRoute = 0;
+			for (i in routes){
+				if(routes[i].summary.totalDistance < best){
+					bestRoute = 1;
+					best = routes[i].summary.totalDistance;
+				}
+			}
+			console.log('best route', routes[bestRoute]);
+			L.Routing.line(routes[bestRoute],{
+				styles : [
+				{
+					color: 'green',
+					weight : '10'
+				}
+				]
+			}).addTo(map);
+		}
+	})
+	});
+
+</script>
+</html>
